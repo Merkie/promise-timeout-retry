@@ -1,28 +1,67 @@
-// src/timeoutretry.test.ts
-import { WithTimeoutAndRetry } from "./timeoutretry";
+// tests/timeoutretry.test.ts
+import { WithTimeout, WithRetry, WithTimeoutAndRetry } from "./timeoutretry";
+
+describe("WithTimeout", () => {
+  test("should resolve if action completes before timeout", async () => {
+    const result = await WithTimeout(() => Promise.resolve("success"), 1000);
+    expect(result).toBe("success");
+  });
+
+  test("should reject if action does not complete before timeout", async () => {
+    await expect(
+      WithTimeout(
+        () => new Promise((resolve) => setTimeout(() => resolve("slow"), 2000)),
+        1000
+      )
+    ).rejects.toThrow("Action timed out");
+  });
+});
+
+describe("WithRetry", () => {
+  test("should resolve if action eventually succeeds", async () => {
+    let attempts = 0;
+    const action = () => {
+      attempts++;
+      return attempts >= 2
+        ? Promise.resolve("success")
+        : Promise.reject(new Error("fail"));
+    };
+
+    const result = await WithRetry(action, 3, 100);
+    expect(result).toBe("success");
+  });
+
+  test("should reject if action never succeeds", async () => {
+    const action = () => Promise.reject(new Error("fail"));
+    await expect(WithRetry(action, 3, 100)).rejects.toThrow("fail");
+  });
+});
 
 describe("WithTimeoutAndRetry", () => {
-  test("should resolve if action succeeds", async () => {
-    const mockAction = jest.fn().mockResolvedValue("success");
-    const result = await WithTimeoutAndRetry(mockAction, 1000, 3);
+  test("should resolve if action completes before global timeout and after some retries", async () => {
+    let attempts = 0;
+    const action = () => {
+      attempts++;
+      return attempts >= 3
+        ? Promise.resolve("success")
+        : Promise.reject(new Error("fail"));
+    };
+
+    const result = await WithTimeoutAndRetry(action, {
+      globalTimeoutMs: 5000,
+      retries: { max: 5, timeoutMs: 100 },
+    });
     expect(result).toBe("success");
   });
 
-  test("should retry on failure and eventually succeed", async () => {
-    const mockAction = jest
-      .fn()
-      .mockRejectedValueOnce(new Error("fail"))
-      .mockResolvedValue("success");
-    const result = await WithTimeoutAndRetry(mockAction, 1000, 3);
-    expect(result).toBe("success");
-    expect(mockAction).toHaveBeenCalledTimes(2);
-  });
-
-  test("should throw after max retries", async () => {
-    const mockAction = jest.fn().mockRejectedValue(new Error("fail"));
-    await expect(WithTimeoutAndRetry(mockAction, 1000, 3)).rejects.toThrow(
-      "fail"
-    );
-    expect(mockAction).toHaveBeenCalledTimes(3);
+  test("should reject if action does not complete before global timeout", async () => {
+    const action = () =>
+      new Promise((resolve) => setTimeout(() => resolve("slow"), 2000));
+    await expect(
+      WithTimeoutAndRetry(action, {
+        globalTimeoutMs: 1000,
+        retries: { max: 3, timeoutMs: 100 },
+      })
+    ).rejects.toThrow("Action timed out");
   });
 });
