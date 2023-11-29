@@ -1,6 +1,6 @@
 {
   "name": "promise-timeout-retry",
-  "version": "0.0.3",
+  "version": "1.0.0",
   "description": "An adaptable utility function for executing asynchronous actions with configurable timeouts and retry capabilities, ensuring robust handling of transient failures in network requests or other operations.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
