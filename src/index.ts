@@ -1,2 +1,2 @@
-import { WithTimeoutAndRetry } from "./timeoutretry";
-export { WithTimeoutAndRetry };
+import { WithTimeoutAndRetry, WithRetry, WithTimeout } from "./timeoutretry";
+export { WithTimeoutAndRetry, WithRetry, WithTimeout };
