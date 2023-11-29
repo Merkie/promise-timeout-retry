@@ -1,0 +1,28 @@
+{
+  "name": "promise-timeout-retry",
+  "version": "0.0.1",
+  "description": "An adaptable utility function for executing asynchronous actions with configurable timeouts and retry capabilities, ensuring robust handling of transient failures in network requests or other operations.",
+  "main": "dist/index.js",
+  "types": "dist/timeoutretry.d.ts",
+  "scripts": {
+    "test": "jest",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/merkie/promise-timeout-retry"
+  },
+  "keywords": [
+    "promise",
+    "timeout",
+    "retry"
+  ],
+  "author": "Merkie",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^29.5.10",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.3.2"
+  }
+}
